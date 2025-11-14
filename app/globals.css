@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+:root {
+  /* TrustMRR Color Palette */
+  --color-primary: #000A35;
+  --color-purple: #7549EA;
+  --color-magenta: #AB57ED;
+  --color-mini-app-background: #f2f5ff;
+  --color-mint: #71ECCA;
+  --color-teal: #00BDD1;
+  --color-grey: #9E9E9E;
+  
+  /* Background and Text */
+  --background: oklch(0.95 0 0);
+  --foreground: #000A35;
+  --background-light: oklch(0.9 0 0);
+  
+  /* Borders and Shadows */
+  --border-color: #e5e5e5;
+  --border-radius: 8px;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+@theme inline {
+  --color-background: oklch(0.922 0 0);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-source-sans);
+  
+  /* TrustMRR Colors - accessible as text-primary, bg-purple, etc. */
+  --color-primary: #000A35;
+  --color-primary-foreground: #ffffff;
+  --color-purple: #7549EA;
+  --color-magenta: #AB57ED;
+  --color-mint: #71ECCA;
+  --color-teal: #00BDD1;
+  --color-grey: #9E9E9E;
+  --color-grey-light: #e5e5e5;
+  --color-grey-dark: #6b6b6b;
+  
+  /* Mini App Colors */
+  --color-mini-app-background: #EFEEFC;
+  --color-mini-app-bg: #DFE0ED;
+  --color-mini-app-icon-bg: #DBD5F8;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-source-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar - minimal aesthetic */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(158, 158, 158, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(158, 158, 158, 0.5);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(158, 158, 158, 0.3) transparent;
+}
+
+/* Slide up animation for modals */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
