@@ -249,9 +249,20 @@ export function getTelegramUser(): TelegramUser | null {
 // Sends sign-in API call only when:
 // 1. It's a Telegram Mini App (has Telegram WebApp with valid initData)
 // 2. OR NODE_ENV === "test" (for testing purposes)
+// Skips API call if user ID already exists in localStorage
 export async function authenticateWithTelegram(): Promise<string | null> {
   try {
     console.log("[Auth] Starting authentication...");
+
+    // Check if we already have the user ID stored - if so, skip API call
+    if (typeof window !== "undefined") {
+      const storedId = localStorage.getItem(OWNER_ID_KEY);
+      if (storedId) {
+        console.log("[Auth] User ID already stored in localStorage:", storedId);
+        console.log("[Auth] Skipping sign-in API call");
+        return storedId;
+      }
+    }
 
     // Check if we're in test environment
     const isTestMode = true //process.env.NODE_ENV === "test";
@@ -403,7 +414,7 @@ export async function authenticateWithTelegram(): Promise<string | null> {
     });
 
     // Call sign-in API with parsed fields
-    const response = await fetch(`${AUTH_BASE_URL}/api/wishlist-auth/telegram/sign-up`, {
+    const response = await fetch(`${AUTH_BASE_URL}/api/wishlist-auth/telegram/sign-in`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

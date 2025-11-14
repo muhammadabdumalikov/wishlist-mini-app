@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Calendar, Bell, Gift, ChevronRight, Edit2, Trash2, ExternalLink } from 'react-feather';
 import dynamic from 'next/dynamic';
 import AddMenu from '../components/AddMenu';
@@ -42,6 +42,39 @@ export default function WishlistPage() {
   const [isMounted, setIsMounted] = useState(false);
   const [showBackButton, setShowBackButton] = useState(false);
 
+  // Load wishlists function - defined before useEffect to avoid dependency issues
+  // Using useRef to track loading state to prevent multiple simultaneous calls
+  const isLoadingRef = useRef(false);
+  
+  const loadWishlists = useCallback(async () => {
+    // Prevent multiple simultaneous calls using ref
+    if (isLoadingRef.current) {
+      console.log("[Page] loadWishlists already in progress, skipping...");
+      return;
+    }
+
+    isLoadingRef.current = true;
+    setIsLoading(true);
+    try {
+      // Update ownerId before checking authentication
+      const currentOwnerId = getOwnerId();
+      if (currentOwnerId) {
+        setOwnerId(currentOwnerId);
+        console.log("[Page] Loading wishlists for owner:", currentOwnerId);
+        const items = await fetchWishlistItems();
+        setWishlists(items);
+        console.log("[Page] Loaded wishlists count:", items.length);
+      } else {
+        setWishlists([]);
+      }
+    } catch (error) {
+      console.error('Error loading wishlists:', error);
+    } finally {
+      setIsLoading(false);
+      isLoadingRef.current = false;
+    }
+  }, []);
+
   // Track navigation state and show/hide BackButton
   useEffect(() => {
     // Show back button when modals are open or we're in a sub-view
@@ -70,7 +103,8 @@ export default function WishlistPage() {
     setIsMounted(true);
     
     // Set ownerId client-side only to avoid hydration mismatch
-    setOwnerId(getOwnerId());
+    const initialOwnerId = getOwnerId();
+    setOwnerId(initialOwnerId);
     
     // Set username and first name for display
     setUsername(getTelegramUsername());
@@ -100,7 +134,10 @@ export default function WishlistPage() {
         console.log("[Page] Authentication result:", userId);
         
         if (userId) {
-          setOwnerId(userId);
+          // Only update ownerId if it changed
+          if (userId !== initialOwnerId) {
+            setOwnerId(userId);
+          }
           // Update username and first name after authentication
           setUsername(getTelegramUsername());
           setFirstName(getTelegramFirstName());
@@ -113,28 +150,24 @@ export default function WishlistPage() {
       }
     };
 
-    initTelegram();
-    loadWishlists();
-  }, []);
-
-  const loadWishlists = async () => {
-    setIsLoading(true);
-    try {
-      // Update ownerId before checking authentication
-      const currentOwnerId = getOwnerId();
-      if (currentOwnerId) {
-        setOwnerId(currentOwnerId);
-        const items = await fetchWishlistItems();
-        setWishlists(items);
-      } else {
-        setWishlists([]);
-      }
-    } catch (error) {
-      console.error('Error loading wishlists:', error);
-    } finally {
-      setIsLoading(false);
+    // Load wishlists only once - after checking initial ownerId and authentication
+    // If we already have ownerId, load immediately. Otherwise wait for auth.
+    if (initialOwnerId) {
+      // We already have ownerId, load immediately
+      loadWishlists();
+      // Still initialize Telegram (for SDK setup) but it will skip API call
+      initTelegram();
+    } else {
+      // No ownerId yet, authenticate first then load
+      initTelegram().then(() => {
+        // After authentication completes, load wishlists
+        const finalOwnerId = getOwnerId();
+        if (finalOwnerId) {
+          loadWishlists();
+        }
+      });
     }
-  };
+  }, [loadWishlists]);
 
 
   const handleCreateItem = async (data: CreateWishlistDto) => {
