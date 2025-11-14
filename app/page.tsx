@@ -6,7 +6,6 @@ import dynamic from 'next/dynamic';
 import AddMenu from '../components/AddMenu';
 import BottomNavigation from '../components/BottomNavigation';
 import WishlistModal from '../components/WishlistModal';
-import MockNativeButtons from '../components/MockNativeButtons';
 
 // Dynamically import BackButton and WebApp to avoid SSR issues
 const BackButton = dynamic(
@@ -20,7 +19,6 @@ import {
   deleteWishlistItem,
   authenticateWithTelegram,
   getOwnerId,
-  isBrowserDevMode,
   getTelegramUsername,
   getTelegramFirstName,
   type WishlistItem,
@@ -39,10 +37,32 @@ export default function WishlistPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<WishlistItem | null>(null);
   const [ownerId, setOwnerId] = useState<string | null>(null);
-  const [showMockButtons, setShowMockButtons] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
   const [firstName, setFirstName] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [showBackButton, setShowBackButton] = useState(false);
+
+  // Track navigation state and show/hide BackButton
+  useEffect(() => {
+    // Show back button when modals are open or we're in a sub-view
+    const shouldShowBack = isModalOpen || showAddMenu || showDeleteConfirm;
+    setShowBackButton(shouldShowBack);
+
+    // Programmatically control Telegram native BackButton
+    if (isMounted && typeof window !== 'undefined') {
+      import('@twa-dev/sdk').then(({ default: WebApp }) => {
+        if (WebApp?.BackButton) {
+          if (shouldShowBack) {
+            WebApp.BackButton.show();
+          } else {
+            WebApp.BackButton.hide();
+          }
+        }
+      }).catch(() => {
+        // SDK not available, ignore
+      });
+    }
+  }, [isModalOpen, showAddMenu, showDeleteConfirm, isMounted]);
 
   // Initialize Telegram WebApp and authenticate
   useEffect(() => {
@@ -55,9 +75,6 @@ export default function WishlistPage() {
     // Set username and first name for display
     setUsername(getTelegramUsername());
     setFirstName(getTelegramFirstName());
-    
-    // Check if we need to show mock native buttons in browser dev mode
-    setShowMockButtons(isBrowserDevMode());
 
     const initTelegram = async () => {
       try {
@@ -157,12 +174,6 @@ export default function WishlistPage() {
     }
   };
 
-  const openCreateModal = () => {
-    setSelectedItem(null);
-    setModalMode('create');
-    setIsModalOpen(true);
-    setShowAddMenu(false);
-  };
 
   const openEditModal = (item: WishlistItem) => {
     setSelectedItem(item);
@@ -176,24 +187,46 @@ export default function WishlistPage() {
   };
 
   const handleBackButtonClick = () => {
-    if (typeof window !== 'undefined') {
-      import('@twa-dev/sdk').then(({ default: WebApp }) => {
-        WebApp.close();
-      });
+    // Handle back navigation: close modals first, then close app
+    if (showDeleteConfirm && itemToDelete) {
+      setShowDeleteConfirm(false);
+      setItemToDelete(null);
+    } else if (isModalOpen) {
+      setIsModalOpen(false);
+      setSelectedItem(null);
+    } else if (showAddMenu) {
+      setShowAddMenu(false);
+    } else {
+      // No modals open, close the app
+      if (typeof window !== 'undefined') {
+        import('@twa-dev/sdk').then(({ default: WebApp }) => {
+          if (WebApp?.BackButton?.isVisible) {
+            WebApp.BackButton.hide();
+          }
+          WebApp.close();
+        }).catch(() => {
+          // Fallback: use browser history
+          if (window.history.length > 1) {
+            window.history.back();
+          } else {
+            window.close();
+          }
+        });
+      }
     }
   };
 
   return (
     <div className="min-h-screen bg-mini-app-bg flex flex-col">
       {/* Native Telegram Back Button - only rendered on client (ssr: false) */}
-      <BackButton onClick={handleBackButtonClick} />
+      {isMounted && showBackButton && (
+        <BackButton onClick={handleBackButtonClick} />
+      )}
 
       {/* Header */}
-      <header className="bg-white relative">
-        {/* Top Bar - Native Telegram buttons are handled by SDK, or mock buttons in browser dev mode */}
-        <div className="h-12 relative">
-          {showMockButtons && <MockNativeButtons />}
-        </div>
+      <header className="bg-white">
+        {/* Top Bar - Native Telegram buttons are handled by SDK, no custom UI needed */}
+        <div className="h-12"></div>
 
         {/* Title Section */}
         <div className="px-4 pb-0">
@@ -363,7 +396,6 @@ export default function WishlistPage() {
       {showAddMenu && (
         <AddMenu 
           onClose={() => setShowAddMenu(false)}
-          onCreateWishlist={openCreateModal}
         />
       )}
 
