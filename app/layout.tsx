@@ -21,10 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru" suppressHydrationWarning>
-      <body
-        className={`${sourceSansPro.variable} antialiased`}
-        style={{ margin: 0, padding: 0 }}
-      >
+      <body className={`${sourceSansPro.variable} antialiased`} suppressHydrationWarning>
         <Script
           src="https://telegram.org/js/telegram-web-app.js"
           strategy="afterInteractive"

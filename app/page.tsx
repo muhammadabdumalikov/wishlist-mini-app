@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import AddMenu from '../components/AddMenu';
 import BottomNavigation from '../components/BottomNavigation';
 import WishlistModal from '../components/WishlistModal';
+import MockNativeButtons from '../components/MockNativeButtons';
 
 // Dynamically import BackButton and WebApp to avoid SSR issues
 const BackButton = dynamic(
@@ -18,8 +19,10 @@ import {
   updateWishlistItem,
   deleteWishlistItem,
   authenticateWithTelegram,
-  isAuthenticated,
   getOwnerId,
+  isBrowserDevMode,
+  getTelegramUsername,
+  getTelegramFirstName,
   type WishlistItem,
   type CreateWishlistDto,
   type UpdateWishlistDto,
@@ -35,9 +38,27 @@ export default function WishlistPage() {
   const [selectedItem, setSelectedItem] = useState<WishlistItem | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<WishlistItem | null>(null);
+  const [ownerId, setOwnerId] = useState<string | null>(null);
+  const [showMockButtons, setShowMockButtons] = useState(false);
+  const [username, setUsername] = useState<string | null>(null);
+  const [firstName, setFirstName] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   // Initialize Telegram WebApp and authenticate
   useEffect(() => {
+    // Mark as mounted to avoid hydration mismatch
+    setIsMounted(true);
+    
+    // Set ownerId client-side only to avoid hydration mismatch
+    setOwnerId(getOwnerId());
+    
+    // Set username and first name for display
+    setUsername(getTelegramUsername());
+    setFirstName(getTelegramFirstName());
+    
+    // Check if we need to show mock native buttons in browser dev mode
+    setShowMockButtons(isBrowserDevMode());
+
     const initTelegram = async () => {
       try {
         // Dynamically import WebApp only on client side
@@ -57,7 +78,13 @@ export default function WishlistPage() {
         }
 
         // Authenticate with Telegram user
-        await authenticateWithTelegram();
+        const userId = await authenticateWithTelegram();
+        if (userId) {
+          setOwnerId(userId);
+          // Update username and first name after authentication
+          setUsername(getTelegramUsername());
+          setFirstName(getTelegramFirstName());
+        }
       } catch (error) {
         console.error('Error initializing Telegram WebApp:', error);
       }
@@ -70,9 +97,14 @@ export default function WishlistPage() {
   const loadWishlists = async () => {
     setIsLoading(true);
     try {
-      if (isAuthenticated()) {
+      // Update ownerId before checking authentication
+      const currentOwnerId = getOwnerId();
+      if (currentOwnerId) {
+        setOwnerId(currentOwnerId);
         const items = await fetchWishlistItems();
         setWishlists(items);
+      } else {
+        setWishlists([]);
       }
     } catch (error) {
       console.error('Error loading wishlists:', error);
@@ -143,8 +175,6 @@ export default function WishlistPage() {
     setShowDeleteConfirm(true);
   };
 
-  const ownerId = getOwnerId();
-
   const handleBackButtonClick = () => {
     if (typeof window !== 'undefined') {
       import('@twa-dev/sdk').then(({ default: WebApp }) => {
@@ -159,9 +189,11 @@ export default function WishlistPage() {
       <BackButton onClick={handleBackButtonClick} />
 
       {/* Header */}
-      <header className="bg-white">
-        {/* Top Bar - Native Telegram buttons are handled by SDK, no custom UI needed */}
-        <div className="h-12"></div>
+      <header className="bg-white relative">
+        {/* Top Bar - Native Telegram buttons are handled by SDK, or mock buttons in browser dev mode */}
+        <div className="h-12 relative">
+          {showMockButtons && <MockNativeButtons />}
+        </div>
 
         {/* Title Section */}
         <div className="px-4 pb-0">
@@ -206,6 +238,19 @@ export default function WishlistPage() {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto pb-20 bg-white">
         <div className="px-4 py-4">
+          {/* User Info Display - for testing in production */}
+          {isMounted && (username || firstName) && (
+            <div className="mb-4 p-3 bg-mini-app-background rounded-lg border border-grey-light">
+              <p className="text-xs text-grey mb-1">Telegram User:</p>
+              {firstName && (
+                <p className="text-sm font-medium text-primary">First Name: {firstName}</p>
+              )}
+              {username && (
+                <p className="text-sm font-medium text-primary">Username: @{username}</p>
+              )}
+            </div>
+          )}
+
           {/* Loading State */}
           {isLoading && (
             <div className="text-center py-12">
@@ -347,7 +392,7 @@ export default function WishlistPage() {
           <div className="relative bg-white rounded-xl p-6 max-w-sm w-full shadow-lg">
             <h3 className="text-lg font-semibold text-primary mb-2">Удалить желание?</h3>
             <p className="text-grey text-sm mb-6">
-              Вы уверены, что хотите удалить "{itemToDelete.title}"?
+              Вы уверены, что хотите удалить &quot;{itemToDelete.title}&quot;?
             </p>
             <div className="flex gap-3">
               <button

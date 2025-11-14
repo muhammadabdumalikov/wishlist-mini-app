@@ -2,6 +2,64 @@
 const API_BASE_URL = "https://api.wetrippo.com/api";
 
 const OWNER_ID_KEY = "tg-wishlist-owner-id";
+const MOCK_USER_ID_KEY = "mock-tg-user-id";
+
+// Get Telegram WebApp instance or mock for development
+function getTelegramWebApp() {
+  if (typeof window === "undefined") return null;
+
+  // @ts-expect-error - Telegram WebApp SDK may not be typed
+  const tg = window.Telegram?.WebApp;
+
+  // Check if Telegram WebApp exists AND has valid user data
+  // In dev mode, if it exists but doesn't have user data, we'll use the mock
+  const hasValidUserData = tg?.initDataUnsafe?.user?.id;
+
+  // If Telegram WebApp exists with valid user data, return it
+  if (tg && hasValidUserData) return tg;
+
+  // In development (browser), create a mock if Telegram WebApp is not available or not initialized
+  // Check for development environment - safe because we already confirmed window exists
+  const isDev = process.env.NODE_ENV === "development";
+  // Also check if we're on localhost (but only if window exists, which we already checked)
+  let isLocalhost = false;
+  try {
+    isLocalhost = window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1";
+  } catch {
+    // Safe fallback if location is not accessible
+    isLocalhost = false;
+  }
+
+  if (isDev || isLocalhost) {
+    // Generate or retrieve a consistent mock user ID
+    let mockUserId = localStorage.getItem(MOCK_USER_ID_KEY);
+    if (!mockUserId) {
+      mockUserId = `mock-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+      localStorage.setItem(MOCK_USER_ID_KEY, mockUserId);
+    }
+
+    return {
+      initDataUnsafe: {
+        user: {
+          id: parseInt(mockUserId.replace(/[^0-9]/g, "").slice(0, 10)) || 123456789,
+          first_name: "Dev",
+          last_name: "User",
+          username: "dev_user",
+          language_code: "en",
+        },
+      },
+      ready: () => { },
+      expand: () => { },
+      close: () => { },
+      showAlert: (message: string) => {
+        alert(message);
+      },
+    };
+  }
+
+  return null;
+}
 
 export interface WishlistItem {
   id: string;
@@ -38,8 +96,7 @@ export function getOwnerId(): string | null {
   
   // Try to get from Telegram WebApp
   try {
-    // @ts-ignore - Telegram WebApp SDK
-    const tg = window.Telegram?.WebApp;
+    const tg = getTelegramWebApp();
     if (tg?.initDataUnsafe?.user?.id) {
       const telegramUserId = String(tg.initDataUnsafe.user.id);
       setOwnerId(telegramUserId);
@@ -66,11 +123,62 @@ export function isAuthenticated(): boolean {
   return getOwnerId() !== null;
 }
 
+// Check if we're in browser dev mode (using mock instead of real Telegram WebApp)
+export function isBrowserDevMode(): boolean {
+  if (typeof window === "undefined") return false;
+
+  // @ts-expect-error - Telegram WebApp SDK may not be typed
+  const tg = window.Telegram?.WebApp;
+  const hasValidUserData = tg?.initDataUnsafe?.user?.id;
+
+  // If Telegram WebApp exists with valid user data, we're in real Telegram
+  if (tg && hasValidUserData) return false;
+
+  // Otherwise, check if we're in dev environment
+  const isDev = process.env.NODE_ENV === "development";
+  let isLocalhost = false;
+  try {
+    isLocalhost = window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1";
+  } catch {
+    isLocalhost = false;
+  }
+
+  return isDev || isLocalhost;
+}
+
+// Get Telegram user username
+export function getTelegramUsername(): string | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const tg = getTelegramWebApp();
+    const username = tg?.initDataUnsafe?.user?.username;
+    return username || null;
+  } catch (error) {
+    console.error("Error getting Telegram username:", error);
+    return null;
+  }
+}
+
+// Get Telegram user first name
+export function getTelegramFirstName(): string | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const tg = getTelegramWebApp();
+    const firstName = tg?.initDataUnsafe?.user?.first_name;
+    return firstName || null;
+  } catch (error) {
+    console.error("Error getting Telegram first name:", error);
+    return null;
+  }
+}
+
 // Authenticate with Telegram user data
 export async function authenticateWithTelegram(): Promise<string | null> {
   try {
-    // @ts-ignore - Telegram WebApp SDK
-    const tg = window.Telegram?.WebApp;
+    const tg = getTelegramWebApp();
     if (!tg?.initDataUnsafe?.user) {
       console.error("Telegram user data not available");
       return null;

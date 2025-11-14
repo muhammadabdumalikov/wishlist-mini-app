@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  wishlist:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3040:3040"
+    environment:
+      - NODE_ENV=production
+      - PORT=3040
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3040"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
