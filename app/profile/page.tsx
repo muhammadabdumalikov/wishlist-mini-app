@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, X, MoreVertical, ChevronRight } from 'react-feather';
+import { User, ChevronRight } from 'react-feather';
 import dynamic from 'next/dynamic';
 import BottomNavigation from '@/components/BottomNavigation';
 import {
@@ -154,18 +154,8 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="bg-white border-b border-grey-light">
-        {/* Top bar with Close and Menu buttons */}
-        <div className="flex items-center justify-between px-4 py-3">
-          <button
-            onClick={handleClose}
-            className="flex items-center gap-2 bg-secondary rounded-full px-4 py-2 hover:bg-secondary/80 transition-colors"
-          >
-            <X className="w-4 h-4 text-black" />
-            <span className="text-sm font-medium text-black">Закрыть</span>
-          </button>
-          <button className="flex items-center gap-2 bg-secondary rounded-full px-4 py-2 hover:bg-secondary/80 transition-colors">
-            <MoreVertical className="w-4 h-4 text-black" />
-          </button>
+        {/* Top bar with Menu button */}
+        <div className="flex items-center justify-end px-4 py-3">
         </div>
         
         {/* Page Title */}

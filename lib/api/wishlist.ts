@@ -1,7 +1,8 @@
 // Wishlist API Service for Telegram Mini App
 const API_BASE_URL = "https://api.wetrippo.com/api";
+const AUTH_BASE_URL = "https://api.wetrippo.com";
 
-const OWNER_ID_KEY = "tg-wishlist-owner-id";
+const OWNER_ID_KEY = "w-o-id";
 const MOCK_USER_ID_KEY = "mock-tg-user-id";
 
 // Get Telegram WebApp instance or mock for development
@@ -85,6 +86,15 @@ export interface UpdateWishlistDto {
 export interface AuthResponse {
   id: string;
   login: string;
+}
+
+export interface TelegramAuthResponse {
+  id: string;
+  telegram_id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
 }
 
 // Auth helpers - using Telegram user ID as owner ID
@@ -235,24 +245,204 @@ export function getTelegramUser(): TelegramUser | null {
   }
 }
 
-// Authenticate with Telegram user data
+// Authenticate with Telegram user data via API
+// Sends sign-in API call only when:
+// 1. It's a Telegram Mini App (has Telegram WebApp with valid initData)
+// 2. OR NODE_ENV === "test" (for testing purposes)
 export async function authenticateWithTelegram(): Promise<string | null> {
   try {
-    const tg = getTelegramWebApp();
-    if (!tg?.initDataUnsafe?.user) {
-      console.error("Telegram user data not available");
+    console.log("[Auth] Starting authentication...");
+
+    // Check if we're in test environment
+    const isTestMode = true //process.env.NODE_ENV === "test";
+
+    // Check if we're in real Telegram Mini App
+    // @ts-expect-error - Telegram WebApp SDK may not be typed
+    const tg = window.Telegram?.WebApp;
+
+    // Check if we have valid Telegram WebApp with initData
+    const hasTelegramWebApp = !!tg;
+    const hasValidUserData = !!tg?.initDataUnsafe?.user?.id;
+    const hasInitData = !!tg?.initData;
+    const isTelegramMiniApp = hasTelegramWebApp && hasValidUserData && hasInitData;
+
+    console.log("[Auth] Checking conditions:", {
+      isTestMode: isTestMode,
+      isTelegramMiniApp: isTelegramMiniApp,
+      hasTelegram: hasTelegramWebApp,
+      hasUserData: hasValidUserData,
+      hasInitData: hasInitData,
+    });
+
+    // Only proceed if:
+    // 1. It's a Telegram Mini App (has tg && hasUserData && hasInitData)
+    // 2. OR NODE_ENV === "test"
+    const shouldCallAPI = isTelegramMiniApp || isTestMode;
+
+    if (!shouldCallAPI) {
+      console.error("[Auth] Not calling API - not in Telegram Mini App and not in test mode");
+      console.error("[Auth] Requirements: isTelegramMiniApp=", isTelegramMiniApp, "isTestMode=", isTestMode);
       return null;
     }
 
-    const user = tg.initDataUnsafe.user;
-    const telegramUserId = String(user.id);
-    
-    // Use Telegram user ID as the owner ID
-    // You might want to sync this with your backend to create/update user
-    setOwnerId(telegramUserId);
-    return telegramUserId;
+    // Prepare request body with parsed fields from Telegram WebApp or test data
+    let requestBody: {
+      id?: number;
+      first_name?: string;
+      last_name?: string;
+      username?: string;
+      language_code?: string;
+      photo_url?: string;
+      auth_date?: number;
+      hash?: string;
+    } = {};
+
+    if (isTelegramMiniApp && tg?.initDataUnsafe) {
+    // In Telegram Mini App, extract data from initDataUnsafe (already parsed)
+      const user = tg.initDataUnsafe.user;
+
+      if (!user?.id || !user?.first_name) {
+        console.error("[Auth] Missing required user data: id or first_name");
+        return null;
+      }
+
+      // Get raw initData string to parse hash and auth_date
+      // The hash is in the raw query string, not in initDataUnsafe
+      const rawInitData = tg.initData || '';
+      let hash = '';
+      let authDate: number | undefined;
+
+      // Parse the raw initData query string format: "key=value&key2=value2"
+      if (rawInitData) {
+        try {
+          const params = new URLSearchParams(rawInitData);
+          hash = params.get('hash') || '';
+          const authDateStr = params.get('auth_date');
+          authDate = authDateStr ? parseInt(authDateStr, 10) : undefined;
+        } catch (error) {
+          console.error("[Auth] Error parsing initData query string:", error);
+        }
+      }
+
+      // Use auth_date from initDataUnsafe if available, otherwise from parsed query string
+      authDate = tg.initDataUnsafe.auth_date || authDate;
+
+      if (!hash) {
+        console.error("[Auth] Hash not found in initData - required for backend verification");
+        return null;
+      }
+
+      if (!authDate) {
+        console.error("[Auth] auth_date not found - required for backend verification");
+        return null;
+      }
+
+      // Build request body matching backend's expected format
+      // Backend expects: id, first_name, last_name?, username?, photo_url?, auth_date, hash
+      requestBody = {
+        id: user.id, // Required - must be number
+        first_name: user.first_name || '', // Required - must not be empty
+        auth_date: authDate, // Required - must be number
+        hash: hash, // Required - must not be empty
+      };
+
+      // Optional fields - only include if they exist
+      if (user.last_name) {
+        requestBody.last_name = user.last_name;
+      }
+      if (user.username) {
+        requestBody.username = user.username;
+      }
+      if (user.photo_url) {
+        requestBody.photo_url = user.photo_url;
+      }
+
+      console.log("[Auth] Telegram Mini App: Using data from Telegram WebApp");
+      console.log("[Auth] Extracted fields:", {
+        id: requestBody.id,
+        first_name: requestBody.first_name,
+        auth_date: requestBody.auth_date,
+        hash: requestBody.hash ? `${requestBody.hash.substring(0, 10)}...` : 'missing',
+      });
+    } else if (isTestMode) {
+      // In test mode, use test data structure
+      requestBody = {
+        "id": 123456789,
+        "first_name": "Test",
+        "last_name": "User",
+        "username": "test_user",
+        "language_code": "en",
+        "photo_url": "https://ui-avatars.com/api/?name=Dev+User&background=8b5cf6&color=fff&size=128",
+        "auth_date": 1763149102,
+        "hash": "1de06ede52ec6f34b16a3aae41529da023056220927a07bf9fb8e0d281d61119"
+      };
+
+      console.log("[Auth] Test mode: Using test data structure");
+    } else {
+      console.error("[Auth] No data available - not in Telegram Mini App and not in test mode");
+      return null;
+    }
+
+    console.log("[Auth] Request body:", JSON.stringify(requestBody));
+    // Validate required fields
+    if (!requestBody.id || !requestBody.first_name || !requestBody.auth_date || !requestBody.hash) {
+      console.error("[Auth] Missing required fields:", {
+        hasId: !!requestBody.id,
+        hasFirstName: !!requestBody.first_name,
+        hasAuthDate: !!requestBody.auth_date,
+        hasHash: !!requestBody.hash,
+      });
+      throw new Error("Missing required authentication fields");
+    }
+
+    console.log("[Auth] Sending parsed data to API:", {
+      id: requestBody.id,
+      first_name: requestBody.first_name,
+      auth_date: requestBody.auth_date,
+      hasHash: !!requestBody.hash,
+    });
+
+    // Call sign-in API with parsed fields
+    const response = await fetch(`${AUTH_BASE_URL}/api/wishlist-auth/telegram/sign-up`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    console.log("[Auth] API Response status:", response.status, response.statusText);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[Auth] API Error response:", errorText);
+      throw new Error(`Authentication failed: ${response.statusText} - ${errorText}`);
+    }
+
+    const userData: TelegramAuthResponse = await response.json();
+    console.log("[Auth] API Response data:", userData);
+
+    // Save the user ID (24-character ID) to localStorage with key 'w-o-id'
+    if (userData.id) {
+      const userId = String(userData.id);
+      setOwnerId(userId);
+      console.log("[Auth] Authentication successful! 24-char ID saved to 'w-o-id':", userId);
+      console.log("[Auth] ID length:", userId.length);
+      if (isTestMode) {
+        console.log("[Auth] ✓ Test mode authentication successful!");
+      }
+      return userId;
+    }
+
+    console.error("[Auth] No user ID in API response");
+    return null;
   } catch (error) {
-    console.error("Error authenticating with Telegram:", error);
+    console.error("[Auth] Error authenticating with Telegram:", error);
+    if (error instanceof Error) {
+      console.error("[Auth] Error details:", error.message, error.stack);
+    }
+
+    // No fallback - if API fails, return null
     return null;
   }
 }

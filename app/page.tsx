@@ -95,12 +95,18 @@ export default function WishlistPage() {
         }
 
         // Authenticate with Telegram user
+        console.log("[Page] Starting authentication...");
         const userId = await authenticateWithTelegram();
+        console.log("[Page] Authentication result:", userId);
+        
         if (userId) {
           setOwnerId(userId);
           // Update username and first name after authentication
           setUsername(getTelegramUsername());
           setFirstName(getTelegramFirstName());
+          console.log("[Page] User authenticated successfully. ID:", userId);
+        } else {
+          console.error("[Page] Authentication failed - no user ID returned");
         }
       } catch (error) {
         console.error('Error initializing Telegram WebApp:', error);
@@ -271,15 +277,27 @@ export default function WishlistPage() {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto pb-20 bg-background">
         <div className="px-4 py-4">
-          {/* User Info Display - for testing in production */}
-          {isMounted && (username || firstName) && (
+          {/* Auth Status Display - for testing */}
+          {isMounted && (
             <div className="mb-4 p-3 bg-mini-app-background rounded-lg border border-grey-light">
-              <p className="text-xs text-black/60 mb-1">Telegram User:</p>
-              {firstName && (
-                <p className="text-sm font-medium text-black">First Name: {firstName}</p>
-              )}
-              {username && (
-                <p className="text-sm font-medium text-black">Username: @{username}</p>
+              <p className="text-xs text-black/60 mb-2 font-semibold">Auth Status:</p>
+              {ownerId ? (
+                <>
+                  <p className="text-xs text-green-600 mb-1">✓ Authenticated</p>
+                  <p className="text-xs text-black/80">User ID: {ownerId}</p>
+                  {(username || firstName) && (
+                    <>
+                      {firstName && (
+                        <p className="text-xs text-black/80">Name: {firstName}</p>
+                      )}
+                      {username && (
+                        <p className="text-xs text-black/80">Username: @{username}</p>
+                      )}
+                    </>
+                  )}
+                </>
+              ) : (
+                <p className="text-xs text-red-600">✗ Not authenticated</p>
               )}
             </div>
           )}

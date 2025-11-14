@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronDown, Plus } from 'react-feather';
+import { Plus } from 'react-feather';
 import dynamic from 'next/dynamic';
 import BottomNavigation from '@/components/BottomNavigation';
 import {
@@ -26,7 +26,6 @@ export default function AddWishPage() {
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [showMockButtons, setShowMockButtons] = useState(false);
 
   const maxDescriptionLength = 170;
 
@@ -36,12 +35,10 @@ export default function AddWishPage() {
     const initBackButton = async () => {
       if (typeof window === 'undefined') return;
       
-      // Check if we need to show mock buttons in browser dev mode
+      // Programmatically control Telegram native BackButton
       // @ts-expect-error - Telegram WebApp SDK may not be typed
       const hasTelegramWebApp = window.Telegram?.WebApp;
-      setShowMockButtons(!hasTelegramWebApp);
       
-      // Programmatically control Telegram native BackButton
       if (hasTelegramWebApp) {
         try {
           // Wait for SDK to be ready
@@ -78,10 +75,6 @@ export default function AddWishPage() {
     
     initBackButton();
   }, []);
-
-  const handleBackClick = () => {
-    router.back();
-  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -145,29 +138,9 @@ export default function AddWishPage() {
       )}
 
       {/* Header */}
-      <header className="bg-background relative">
-        {/* Top Bar - Native Telegram buttons */}
-        <div className="h-12 relative">
-          {/* Mock back button for browser dev mode */}
-          {isMounted && showMockButtons && (
-            <div className="absolute top-0 left-0 right-0 h-12 flex items-center justify-between px-4 z-50">
-              <button
-                onClick={handleBackClick}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-background/90 backdrop-blur-sm rounded-full border border-grey-light shadow-sm hover:bg-background transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4 text-black" />
-                <span className="text-sm font-medium text-black">Назад</span>
-              </button>
-              <button className="flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-sm rounded-full border border-grey-light shadow-sm hover:bg-background transition-colors">
-                <ChevronDown className="w-3.5 h-3.5 text-black" />
-                <span className="text-black text-base leading-none">...</span>
-              </button>
-            </div>
-          )}
-        </div>
-
+      <header className="bg-background">
         {/* Title */}
-        <div className="px-4 pb-4">
+        <div className="px-4 py-4">
           <h1 className="text-2xl font-bold text-black">Добавить желание</h1>
         </div>
       </header>
