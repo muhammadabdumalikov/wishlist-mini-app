@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronDown, Plus, Image as ImageIcon } from 'react-feather';
+import { ChevronLeft, ChevronDown, Plus } from 'react-feather';
 import dynamic from 'next/dynamic';
 import BottomNavigation from '@/components/BottomNavigation';
 import {
@@ -22,29 +22,62 @@ export default function AddWishPage() {
   const [link, setLink] = useState('');
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [showBackButton, setShowBackButton] = useState(true);
+  const [showMockButtons, setShowMockButtons] = useState(false);
 
   const maxDescriptionLength = 170;
 
   useEffect(() => {
     setIsMounted(true);
     
-    // Programmatically control Telegram native BackButton
-    if (isMounted && typeof window !== 'undefined') {
-      import('@twa-dev/sdk').then(({ default: WebApp }) => {
-        if (WebApp?.BackButton) {
-          WebApp.BackButton.show();
+    const initBackButton = async () => {
+      if (typeof window === 'undefined') return;
+      
+      // Check if we need to show mock buttons in browser dev mode
+      // @ts-expect-error - Telegram WebApp SDK may not be typed
+      const hasTelegramWebApp = window.Telegram?.WebApp;
+      setShowMockButtons(!hasTelegramWebApp);
+      
+      // Programmatically control Telegram native BackButton
+      if (hasTelegramWebApp) {
+        try {
+          // Wait for SDK to be ready
+          const WebApp = (await import('@twa-dev/sdk')).default;
+          
+          // Ensure SDK is initialized
+          WebApp.ready();
+          WebApp.expand();
+          
+          // Show the back button - try multiple times to ensure it shows
+          const showButton = () => {
+            if (WebApp?.BackButton) {
+              WebApp.BackButton.show();
+              // Retry after a short delay to ensure it's visible
+              setTimeout(() => {
+                if (WebApp?.BackButton) {
+                  WebApp.BackButton.show();
+                }
+              }, 100);
+            }
+          };
+          
+          // Show immediately if SDK is already loaded
+          showButton();
+          
+          // Also try after a short delay in case SDK needs time to initialize
+          setTimeout(showButton, 50);
+          setTimeout(showButton, 200);
+        } catch (error) {
+          console.error('Error initializing BackButton:', error);
         }
-      }).catch(() => {
-        // SDK not available, ignore
-      });
-    }
-  }, [isMounted]);
+      }
+    };
+    
+    initBackButton();
+  }, []);
 
   const handleBackClick = () => {
     router.back();
@@ -60,7 +93,6 @@ export default function AddWishPage() {
         return;
       }
       
-      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -107,8 +139,8 @@ export default function AddWishPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Native Telegram Back Button */}
-      {isMounted && showBackButton && (
+      {/* Native Telegram Back Button - always rendered, SDK controls visibility */}
+      {isMounted && (
         <BackButton onClick={handleBackButtonClick} />
       )}
 
@@ -117,7 +149,7 @@ export default function AddWishPage() {
         {/* Top Bar - Native Telegram buttons */}
         <div className="h-12 relative">
           {/* Mock back button for browser dev mode */}
-          {typeof window !== 'undefined' && !window?.Telegram?.WebApp && (
+          {isMounted && showMockButtons && (
             <div className="absolute top-0 left-0 right-0 h-12 flex items-center justify-between px-4 z-50">
               <button
                 onClick={handleBackClick}
