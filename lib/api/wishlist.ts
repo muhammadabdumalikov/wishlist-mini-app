@@ -47,6 +47,7 @@ function getTelegramWebApp() {
           last_name: "User",
           username: "dev_user",
           language_code: "en",
+          photo_url: "https://ui-avatars.com/api/?name=Dev+User&background=8b5cf6&color=fff&size=128",
         },
       },
       ready: () => { },
@@ -171,6 +172,65 @@ export function getTelegramFirstName(): string | null {
     return firstName || null;
   } catch (error) {
     console.error("Error getting Telegram first name:", error);
+    return null;
+  }
+}
+
+// Get Telegram user last name
+export function getTelegramLastName(): string | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const tg = getTelegramWebApp();
+    const lastName = tg?.initDataUnsafe?.user?.last_name;
+    return lastName || null;
+  } catch (error) {
+    console.error("Error getting Telegram last name:", error);
+    return null;
+  }
+}
+
+// Get Telegram user photo URL
+export function getTelegramPhotoUrl(): string | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const tg = getTelegramWebApp();
+    const photoUrl = tg?.initDataUnsafe?.user?.photo_url;
+    return photoUrl || null;
+  } catch (error) {
+    console.error("Error getting Telegram photo URL:", error);
+    return null;
+  }
+}
+
+// Get full Telegram user object
+export interface TelegramUser {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  language_code?: string;
+  photo_url?: string;
+}
+
+export function getTelegramUser(): TelegramUser | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const tg = getTelegramWebApp();
+    const user = tg?.initDataUnsafe?.user;
+    if (!user) return null;
+    return {
+      id: user.id,
+      first_name: user.first_name || "",
+      last_name: user.last_name,
+      username: user.username,
+      language_code: user.language_code,
+      photo_url: user.photo_url,
+    };
+  } catch (error) {
+    console.error("Error getting Telegram user:", error);
     return null;
   }
 }

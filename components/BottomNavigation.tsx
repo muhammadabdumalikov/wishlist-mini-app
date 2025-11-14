@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter, usePathname } from 'next/navigation';
 import { Home, Search, Plus, Gift, User } from 'react-feather';
 
 interface BottomNavigationProps {
@@ -7,11 +8,21 @@ interface BottomNavigationProps {
 }
 
 export default function BottomNavigation({ onAddClick }: BottomNavigationProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const isActive = (path: string) => pathname === path;
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-mini-app-background border-t border-grey-light z-40">
       <div className="flex items-center justify-around px-2 py-2">
         {/* Вишлисты */}
-        <button className="flex flex-col items-center gap-1 px-3 py-2 text-black">
+        <button
+          onClick={() => router.push('/')}
+          className={`flex flex-col items-center gap-1 px-3 py-2 transition-colors ${
+            isActive('/') ? 'text-black' : 'text-black/60 hover:text-black'
+          }`}
+        >
           <Home className="w-5 h-5" />
           <span className="text-xs font-medium">Вишлисты</span>
         </button>
@@ -37,7 +48,12 @@ export default function BottomNavigation({ onAddClick }: BottomNavigationProps) 
         </button>
 
         {/* Профиль */}
-        <button className="flex flex-col items-center gap-1 px-3 py-2 text-black/60 hover:text-black transition-colors">
+        <button
+          onClick={() => router.push('/profile')}
+          className={`flex flex-col items-center gap-1 px-3 py-2 transition-colors ${
+            isActive('/profile') ? 'text-black' : 'text-black/60 hover:text-black'
+          }`}
+        >
           <User className="w-5 h-5" />
           <span className="text-xs font-medium">Профиль</span>
         </button>
