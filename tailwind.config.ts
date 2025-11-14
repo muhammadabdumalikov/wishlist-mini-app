@@ -10,25 +10,34 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#000A35",
-          dark: "#000A35",
+          DEFAULT: "#68458C",
           foreground: "#ffffff",
         },
-        purple: {
-          DEFAULT: "#7549EA",
-          light: "#AB57ED",
+        secondary: {
+          DEFAULT: "#E3D4F3",
         },
-        magenta: "#AB57ED",
-        mint: "#71ECCA",
-        teal: "#00BDD1",
+        background: {
+          DEFAULT: "#F2F4FF",
+        },
+        additional: {
+          DEFAULT: "#D5F2F4",
+        },
+        tags: {
+          DEFAULT: "#FB98CC",
+        },
         grey: {
           DEFAULT: "#9E9E9E",
-          light: "#e5e5e5",
-          dark: "#6b6b6b",
+          light: "#E3D4F3",
+          dark: "#68458C",
         },
-        "mini-app-background": "#EFEEFC", // Card background - light purple
-        "mini-app-bg": "#DFE0ED", // Main background - light lavender gray
-        "mini-app-icon-bg": "#DBD5F8", // Icon container background
+        // Legacy support - map old names to new colors
+        purple: {
+          DEFAULT: "#68458C",
+          light: "#E3D4F3",
+        },
+        "mini-app-background": "#E3D4F3",
+        "mini-app-bg": "#F2F4FF",
+        "mini-app-icon-bg": "#E3D4F3",
       },
       fontFamily: {
         sans: ["var(--font-source-sans)", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],

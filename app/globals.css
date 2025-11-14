@@ -1,48 +1,47 @@
 @import "tailwindcss";
 
 :root {
-  /* TrustMRR Color Palette */
-  --color-primary: #000A35;
-  --color-purple: #7549EA;
-  --color-magenta: #AB57ED;
-  --color-mini-app-background: #f2f5ff;
-  --color-mint: #71ECCA;
-  --color-teal: #00BDD1;
+  /* Color Palette */
+  --color-primary: #68458C;
+  --color-secondary: #E3D4F3;
+  --color-background: #F2F4FF;
+  --color-additional: #D5F2F4;
+  --color-tags: #FB98CC;
   --color-grey: #9E9E9E;
   
   /* Background and Text */
-  --background: oklch(0.95 0 0);
-  --foreground: #000A35;
-  --background-light: oklch(0.9 0 0);
+  --background: #F2F4FF;
+  --foreground: #68458C;
+  --background-light: #E3D4F3;
   
   /* Borders and Shadows */
-  --border-color: #e5e5e5;
+  --border-color: #E3D4F3;
   --border-radius: 8px;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 2px 0 rgba(104, 69, 140, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(104, 69, 140, 0.15);
+  --shadow-lg: 0 10px 15px -3px rgba(104, 69, 140, 0.2);
 }
 
 @theme inline {
-  --color-background: oklch(0.922 0 0);
+  --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-source-sans);
   
-  /* TrustMRR Colors - accessible as text-primary, bg-purple, etc. */
-  --color-primary: #000A35;
+  /* Color Palette - accessible as text-primary, bg-secondary, etc. */
+  --color-primary: #68458C;
   --color-primary-foreground: #ffffff;
-  --color-purple: #7549EA;
-  --color-magenta: #AB57ED;
-  --color-mint: #71ECCA;
-  --color-teal: #00BDD1;
+  --color-secondary: #E3D4F3;
+  --color-background: #F2F4FF;
+  --color-additional: #D5F2F4;
+  --color-tags: #FB98CC;
   --color-grey: #9E9E9E;
-  --color-grey-light: #e5e5e5;
-  --color-grey-dark: #6b6b6b;
+  --color-grey-light: #E3D4F3;
+  --color-grey-dark: #68458C;
   
-  /* Mini App Colors */
-  --color-mini-app-background: #EFEEFC;
-  --color-mini-app-bg: #DFE0ED;
-  --color-mini-app-icon-bg: #DBD5F8;
+  /* Mini App Colors - using new palette */
+  --color-mini-app-background: #E3D4F3;
+  --color-mini-app-bg: #F2F4FF;
+  --color-mini-app-icon-bg: #E3D4F3;
 }
 
 body {

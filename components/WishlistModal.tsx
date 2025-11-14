@@ -78,7 +78,7 @@ export default function WishlistModal({
         onClick={onClose}
       />
       <div className="relative bg-white rounded-t-2xl w-full max-w-sm max-h-[90vh] overflow-hidden shadow-lg">
-        <div className="bg-purple p-4 text-white">
+        <div className="bg-primary p-4 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white/20 backdrop-blur-sm rounded-md">
@@ -99,7 +99,7 @@ export default function WishlistModal({
 
         <form onSubmit={handleSubmit} className="p-4 space-y-4 overflow-y-auto max-h-[calc(90vh-100px)]">
           <div className="space-y-2">
-            <label htmlFor="title" className="flex items-center gap-2 text-sm font-medium text-primary">
+            <label htmlFor="title" className="flex items-center gap-2 text-sm font-medium text-black">
               <Gift className="w-4 h-4" />
               {translations.titleLabel}
             </label>
@@ -110,12 +110,12 @@ export default function WishlistModal({
               onChange={(e) => setTitle(e.target.value)}
               placeholder={translations.titlePlaceholder}
               required
-              className="w-full px-4 py-2.5 border border-grey-light rounded-md focus:border-purple focus:ring-2 focus:ring-purple/20 outline-none transition-all text-primary placeholder:text-grey"
+              className="w-full px-4 py-2.5 border border-grey-light rounded-md focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-black placeholder:text-black/40"
             />
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="imageUrl" className="flex items-center gap-2 text-sm font-medium text-primary">
+            <label htmlFor="imageUrl" className="flex items-center gap-2 text-sm font-medium text-black">
               <Image className="w-4 h-4" />
               {translations.imageUrlLabel}
             </label>
@@ -126,7 +126,7 @@ export default function WishlistModal({
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder={translations.imageUrlPlaceholder}
               required
-              className="w-full px-4 py-2.5 border border-grey-light rounded-md focus:border-purple focus:ring-2 focus:ring-purple/20 outline-none transition-all text-primary placeholder:text-grey"
+              className="w-full px-4 py-2.5 border border-grey-light rounded-md focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-black placeholder:text-black/40"
             />
             {imageUrl && (
               <div className="mt-3 rounded-md overflow-hidden border border-grey-light shadow-sm">
@@ -144,7 +144,7 @@ export default function WishlistModal({
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="productUrl" className="flex items-center gap-2 text-sm font-medium text-primary">
+            <label htmlFor="productUrl" className="flex items-center gap-2 text-sm font-medium text-black">
               <Link2 className="w-4 h-4" />
               {translations.productUrlLabel}
             </label>
@@ -155,7 +155,7 @@ export default function WishlistModal({
               onChange={(e) => setProductUrl(e.target.value)}
               placeholder={translations.productUrlPlaceholder}
               required
-              className="w-full px-4 py-2.5 border border-grey-light rounded-md focus:border-purple focus:ring-2 focus:ring-purple/20 outline-none transition-all text-primary placeholder:text-grey"
+              className="w-full px-4 py-2.5 border border-grey-light rounded-md focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-black placeholder:text-black/40"
             />
           </div>
 
@@ -164,14 +164,14 @@ export default function WishlistModal({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="flex-1 px-6 py-2.5 border border-grey-light text-grey rounded-md font-medium hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-6 py-2.5 border border-grey-light text-black rounded-md font-medium hover:bg-secondary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {translations.cancel}
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 px-6 py-2.5 bg-purple text-white rounded-md font-medium hover:bg-purple/90 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-6 py-2.5 bg-primary text-white rounded-md font-medium hover:bg-primary/90 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? translations.saving : mode === 'create' ? translations.create : translations.save}
             </button>

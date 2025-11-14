@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { X, Gift } from 'react-feather';
+import { X, Gift, Zap } from 'react-feather';
 
 interface AddMenuProps {
   onClose: () => void;
@@ -17,6 +17,16 @@ export default function AddMenu({ onClose, onCreateWishlist }: AddMenuProps) {
     router.push('/add');
   };
 
+  const handleCreateWishlist = () => {
+    onClose();
+    if (onCreateWishlist) {
+      onCreateWishlist();
+    } else {
+      // Navigate to wishlist creation page or open modal
+      console.log('Create wishlist');
+    }
+  };
+
   return (
     <div 
       className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center"
@@ -28,10 +38,10 @@ export default function AddMenu({ onClose, onCreateWishlist }: AddMenuProps) {
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-primary">Добавить</h2>
+          <h2 className="text-lg font-semibold text-black">Добавить</h2>
           <button
             onClick={onClose}
-            className="text-grey hover:text-primary transition-colors"
+            className="text-black/60 hover:text-black transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -39,10 +49,21 @@ export default function AddMenu({ onClose, onCreateWishlist }: AddMenuProps) {
 
         {/* Options */}
         <div className="flex gap-4">
+          {/* Вишлист */}
+          <button 
+            onClick={handleCreateWishlist}
+            className="flex-1 bg-primary rounded-xl p-6 flex flex-col items-center justify-center gap-3 hover:bg-primary/90 transition-colors shadow-md aspect-square"
+          >
+            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+              <Zap className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-white font-medium text-sm">Вишлист</span>
+          </button>
+
           {/* Желание */}
           <button 
             onClick={handleCreateWish}
-            className="flex-1 bg-purple rounded-xl p-6 flex flex-col items-center justify-center gap-3 hover:bg-purple/90 transition-colors shadow-md"
+            className="flex-1 bg-primary rounded-xl p-6 flex flex-col items-center justify-center gap-3 hover:bg-primary/90 transition-colors shadow-md aspect-square"
           >
             <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
               <Gift className="w-6 h-6 text-white" />

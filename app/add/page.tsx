@@ -138,14 +138,14 @@ export default function AddWishPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Native Telegram Back Button - always rendered, SDK controls visibility */}
       {isMounted && (
         <BackButton onClick={handleBackButtonClick} />
       )}
 
       {/* Header */}
-      <header className="bg-white relative">
+      <header className="bg-background relative">
         {/* Top Bar - Native Telegram buttons */}
         <div className="h-12 relative">
           {/* Mock back button for browser dev mode */}
@@ -153,14 +153,14 @@ export default function AddWishPage() {
             <div className="absolute top-0 left-0 right-0 h-12 flex items-center justify-between px-4 z-50">
               <button
                 onClick={handleBackClick}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full border border-grey-light shadow-sm hover:bg-white transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-background/90 backdrop-blur-sm rounded-full border border-grey-light shadow-sm hover:bg-background transition-colors"
               >
-                <ChevronLeft className="w-4 h-4 text-grey-dark" />
-                <span className="text-sm font-medium text-grey-dark">Назад</span>
+                <ChevronLeft className="w-4 h-4 text-black" />
+                <span className="text-sm font-medium text-black">Назад</span>
               </button>
-              <button className="flex items-center gap-1 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full border border-grey-light shadow-sm hover:bg-white transition-colors">
-                <ChevronDown className="w-3.5 h-3.5 text-grey-dark" />
-                <span className="text-grey-dark text-base leading-none">...</span>
+              <button className="flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-sm rounded-full border border-grey-light shadow-sm hover:bg-background transition-colors">
+                <ChevronDown className="w-3.5 h-3.5 text-black" />
+                <span className="text-black text-base leading-none">...</span>
               </button>
             </div>
           )}
@@ -168,7 +168,7 @@ export default function AddWishPage() {
 
         {/* Title */}
         <div className="px-4 pb-4">
-          <h1 className="text-2xl font-bold text-primary">Добавить желание</h1>
+          <h1 className="text-2xl font-bold text-black">Добавить желание</h1>
         </div>
       </header>
 
@@ -177,7 +177,7 @@ export default function AddWishPage() {
         <form onSubmit={handleSubmit} className="px-4 py-4 space-y-4">
           {/* Link Field */}
           <div className="space-y-2">
-            <label htmlFor="link" className="text-sm font-medium text-primary block">
+            <label htmlFor="link" className="text-sm font-medium text-black block">
               Ссылка, где купить желаемое
             </label>
             <input
@@ -186,14 +186,14 @@ export default function AddWishPage() {
               value={link}
               onChange={(e) => setLink(e.target.value)}
               placeholder="https://market.yandex.ru/gift"
-              className="w-full px-4 py-3 border border-grey-light rounded-lg focus:border-purple focus:ring-2 focus:ring-purple/20 outline-none transition-all text-primary placeholder:text-grey"
+              className="w-full px-4 py-3 border border-grey-light rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-black placeholder:text-black/40"
             />
           </div>
 
           {/* Title Field */}
           <div className="space-y-2">
-            <label htmlFor="title" className="text-sm font-medium text-primary block">
-              Название<span className="text-red-500">*</span>
+            <label htmlFor="title" className="text-sm font-medium text-black block">
+              Название<span className="text-black">*</span>
             </label>
             <input
               type="text"
@@ -202,13 +202,13 @@ export default function AddWishPage() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Игрушечная кухня с посудой и аксессуарами"
               required
-              className="w-full px-4 py-3 border border-grey-light rounded-lg focus:border-purple focus:ring-2 focus:ring-purple/20 outline-none transition-all text-primary placeholder:text-grey"
+              className="w-full px-4 py-3 border border-grey-light rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-black placeholder:text-black/40"
             />
           </div>
 
           {/* Price Field */}
           <div className="space-y-2">
-            <label htmlFor="price" className="text-sm font-medium text-primary block">
+            <label htmlFor="price" className="text-sm font-medium text-black block">
               Цена
             </label>
             <div className="relative">
@@ -222,9 +222,9 @@ export default function AddWishPage() {
                   setPrice(value);
                 }}
                 placeholder="3 609"
-                className="w-full px-4 py-3 pr-10 border border-grey-light rounded-lg focus:border-purple focus:ring-2 focus:ring-purple/20 outline-none transition-all text-primary placeholder:text-grey"
+                className="w-full px-4 py-3 pr-10 border border-grey-light rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-black placeholder:text-black/40"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-grey text-sm">
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-black/60 text-sm">
                 ₽
               </span>
             </div>
@@ -232,13 +232,13 @@ export default function AddWishPage() {
 
           {/* Image Upload Field */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-primary block">
+            <label className="text-sm font-medium text-black block">
               Добавьте изображение
             </label>
             <div className="flex items-center gap-4">
               <label
                 htmlFor="image-upload"
-                className="w-24 h-24 border-2 border-dashed border-grey-light rounded-lg flex items-center justify-center cursor-pointer hover:border-purple transition-colors bg-gray-50"
+                className="w-24 h-24 border-2 border-dashed border-grey-light rounded-lg flex items-center justify-center cursor-pointer hover:border-primary transition-colors bg-secondary"
               >
                 {imagePreview ? (
                   <img
@@ -247,7 +247,7 @@ export default function AddWishPage() {
                     className="w-full h-full object-cover rounded-lg"
                   />
                 ) : (
-                  <Plus className="w-8 h-8 text-grey" />
+                  <Plus className="w-8 h-8 text-black/60" />
                 )}
                 <input
                   type="file"
@@ -258,7 +258,7 @@ export default function AddWishPage() {
                 />
               </label>
               <div className="flex-1">
-                <p className="text-xs text-grey">
+                <p className="text-xs text-black/60">
                   Нажмите на +, чтобы вставить изображение в формате .jpeg, .webp, .svg, или .png
                 </p>
               </div>
@@ -268,11 +268,11 @@ export default function AddWishPage() {
           {/* Description Field */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label htmlFor="description" className="text-sm font-medium text-primary block">
+              <label htmlFor="description" className="text-sm font-medium text-black block">
                 Описание желания
               </label>
               <span className={`text-xs ${
-                description.length > maxDescriptionLength ? 'text-red-500' : 'text-grey'
+                description.length > maxDescriptionLength ? 'text-black' : 'text-black/60'
               }`}>
                 {description.length}/{maxDescriptionLength}
               </span>
@@ -288,7 +288,7 @@ export default function AddWishPage() {
               }}
               placeholder="Опишите ваше желание..."
               rows={4}
-              className="w-full px-4 py-3 border border-grey-light rounded-lg focus:border-purple focus:ring-2 focus:ring-purple/20 outline-none transition-all text-primary placeholder:text-grey resize-none"
+              className="w-full px-4 py-3 border border-grey-light rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-black placeholder:text-black/40 resize-none"
             />
           </div>
 
@@ -296,7 +296,7 @@ export default function AddWishPage() {
           <button
             type="submit"
             disabled={isSubmitting || !title.trim()}
-            className="w-full py-4 bg-purple text-white rounded-lg font-medium hover:bg-purple/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md mt-6"
+            className="w-full py-4 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md mt-6"
           >
             {isSubmitting ? 'Добавление...' : 'Добавить'}
           </button>
