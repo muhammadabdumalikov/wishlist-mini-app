@@ -294,10 +294,15 @@ export default function WishlistPage() {
 
           {/* Wishlist Card */}
           {!isLoading && ownerId && (
-            <button className="w-full bg-mini-app-background rounded-xl p-4 mb-4 hover:bg-secondary transition-colors text-left">
+            <button 
+              className="w-full rounded-xl p-4 mb-4 hover:opacity-90 transition-opacity text-left shadow-sm"
+              style={{
+                background: 'linear-gradient(to right, #E3D4F3 0%, #F0F9C7 50%, #D5F2F4 100%)'
+              }}
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 flex-1">
-                  <div className="w-12 h-12 rounded-xl bg-mini-app-icon-bg flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-xl bg-white/70 backdrop-blur-sm flex items-center justify-center shadow-sm">
                     <Gift className="w-6 h-6 text-black" />
                   </div>
                   <div className="flex-1">
